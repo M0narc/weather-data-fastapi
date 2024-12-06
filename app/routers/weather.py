@@ -3,7 +3,6 @@ from fastapi import APIRouter, HTTPException
 from matplotlib import pyplot as plt
 import seaborn as sns
 from fastapi.responses import StreamingResponse
-from app.utils.helpers import celsius_to_fahrenheit
 from app.services.weather_service import OUTPUT_FILE, fetch_weather_data, process_weather_data, save_to_csv
 
 router = APIRouter(prefix="/weather", tags=["Weather"])
