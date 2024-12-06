@@ -26,6 +26,11 @@ then cd in the weather-data-fastapi folder,
     `uvicorn app.main:app --reload`
 
 
- urls to be used
+ - Urls to be used
 
- - `http://127.0.0.1:8000/weather/plot` in order to see the 
+    * `http://127.0.0.1:8000/weather/plot` in order to see the the chart.
+    * `http://127.0.0.1:8000/weather/fetch` just to see the json.
+    * `http://127.0.0.1:8000/weather/csv` to download the csv.
+
+- Alternatively you can just use swagger
+ * `http://127.0.0.1:8000/docs`

@@ -19,7 +19,6 @@ CITIES = [
     {"City": "Cape Town", "Latitude": -33.9249, "Longitude": 18.4241},
     {"City": "Moscow", "Latitude": 55.7558, "Longitude": 37.6173},
     {"City": "Rio de Janeiro", "Latitude": -22.9068, "Longitude": -43.1729}
-
 ]
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
@@ -34,50 +33,35 @@ def fetch_weather_data():
             "latitude": city["Latitude"],
             "longitude": city["Longitude"],
             "current_weather": True,
-            "hourly": "relativehumidity_2m",
         }
         try:
             logging.info(f"Fetching data for {city['City']}...")
             response = requests.get(BASE_URL, params=params, timeout=10)
             response.raise_for_status()
             data = response.json()
-            print(data)
-
-            # Validate response data
+            
+            # Validate 'current_weather' in response
             if "current_weather" not in data:
-                logging.warning(f"No 'current_weather' found for {city['City']}: {data}")
+                logging.warning(f"No 'current_weather' data found for {city['City']}.")
                 continue
 
             current_weather = data["current_weather"]
 
-            # Extract humidity
-            humidity = None
-            if "hourly" in data and "relativehumidity_2m" in data["hourly"]:
-                try:
-                    current_time = current_weather["time"]
-                    print("current time ->", current_time)
-                    print("----------")
-                    t_index = data["hourly"]["time"].index(current_time)
-                    print("index time", t_index)
-                    print("----------")
-                    humidity = data["hourly"]["relativehumidity_2m"][t_index]
-                    print("humidity ->", humidity)
-                    print("----------")
-                except ValueError:
-                    logging.warning(f"Time mismatch for {city['City']}")
-                    continue
+            # Extract and convert relevant data
+            temperature_c = current_weather.get("temperature")
+            temperature_f = celsius_to_fahrenheit(temperature_c)
+            humidity = current_weather.get("relative_humidity")
+            wind_speed_mps = current_weather.get("windspeed")
+            wind_speed_mph = mps_to_mph(wind_speed_mps / 3.6) if wind_speed_mps else None
 
-            # Convert wind speed (if exists)
-            wind_speed = current_weather.get("windspeed", 0)
-            wind_speed_ms = wind_speed / 3.6
-
-            # Append data
+            # Append weather data
             weather_data.append({
                 "City": city["City"],
-                "Temperature (C)": current_weather["temperature"],
-                "Temperature (F)": celsius_to_fahrenheit(current_weather["temperature"]),
+                "Temperature (C)": temperature_c,
+                "Temperature (F)": round(temperature_f, 2),
                 "Humidity (%)": humidity,
-                "Wind Speed (m/s)": round(wind_speed_ms, 2),
+                "Wind Speed (m/s)": round(wind_speed_mps, 2) if wind_speed_mps else None,
+                "Wind Speed (mph)": round(wind_speed_mph, 2) if wind_speed_mph else None,
             })
             logging.info(f"Data fetched successfully for {city['City']}.")
 
